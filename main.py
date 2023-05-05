@@ -25,6 +25,9 @@ class iris_detection():
         self.StartPicture = cv2.cvtColor(self.StartPicture, cv2.COLOR_BGR2GRAY)
         self.ComparisonPicture = cv2.cvtColor(self.ComparisonPicture, cv2.COLOR_BGR2GRAY)
 
+    def FindPupil(self):
+        pass
+
 iris_dec = iris_detection("Iris_Picture/Iris1.jpg", "Iris_Picture/Iris2.jpg");
 iris_dec.load_image()
 iris_dec.ShowImage()
