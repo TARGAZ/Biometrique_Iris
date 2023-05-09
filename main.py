@@ -1,11 +1,6 @@
-import G6_iris_recognition
 import cv2
-from G6_iris_recognition import feature_vec
-from G6_iris_recognition import iris_matching
-from G6_iris_recognition import encode_iris_model
-from G6_iris_recognition import main
 import os
-import pickle
+import numpy as np
 
 
 def count_images_in_folder(folder_path):
@@ -41,32 +36,22 @@ class iris_detection():
         cv2.imshow("StartPicture", self.StartPicture[0])
         cv2.waitKey(0)
         cv2.destroyAllWindows()
-
-    def resize_image(self):
+    def better_picture(self):
         for i in range(len(self.StartPicture)):
-            self.StartPicture[i] = cv2.resize(self.StartPicture[i], (320, 240))
+            self.StartPicture[i] = cv2.cvtColor(self.StartPicture[i], cv2.COLOR_BGR2GRAY)
+            self.StartPicture[i] = cv2.equalizeHist(self.StartPicture[i])
+            self.StartPicture[i] = cv2.GaussianBlur(self.StartPicture[i], (5, 5), 0)
 
-    def encode_image(self, output_file):
-        encoding_data = {'encodings': [], 'names': []}
+    def iris_detection(self):
+        for i in range(len(self.StartPicture)):
+            self.StartPicture[i] = cv2.Canny(self.StartPicture[i], 100, 200)
 
-        for image_file in self.StartPicturePath:
-            image_path = os.path.join(self.StartPicturePath, image_file)
-
-            feature_vec = G6_iris_recognition.iris_image_encoding("Intput_database/001L_1.png")
-
-            encoding_data['encodings'].append(feature_vec)
-            encoding_data['names'].append(image_file.split('.')[0])
-
-        with open(output_file, 'wb') as f:
-            pickle.dump(encoding_data, f)
-
-
-
-output_file = "output_image.pickle"
 image_count = count_images_in_folder("Intput_database")
 iris_dec = iris_detection("Intput_database", image_count);
 iris_dec.load_image_from_folder()
 iris_dec.ShowImage()
-iris_dec.resize_image()
 iris_dec.ShowImage()
-iris_dec.encode_image(output_file)
+iris_dec.better_picture()
+iris_dec.ShowImage()
+iris_dec.iris_detection()
+iris_dec.ShowImage()
