@@ -1,6 +1,5 @@
 import cv2
 import os
-import matplotlib.pyplot as plt
 
 
 def count_images_in_folder(folder_path):
