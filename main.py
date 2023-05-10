@@ -49,8 +49,8 @@ class IrisDetection:
         # Filter the contours to only get the ones that are smaller than the source picture
         filtered_contours = [
             contour for contour in contours
-            if 40 > cv2.boundingRect(contour)[2] > 5 and
-               40 > cv2.boundingRect(contour)[3] > 5
+            if 40 > cv2.boundingRect(contour)[2] > 0 and
+               40 > cv2.boundingRect(contour)[3] > 0
         ]
 
         for contour in filtered_contours:
@@ -60,7 +60,7 @@ class IrisDetection:
             plt.show()
             res = cv2.matchTemplate(self.iris_pictures[source_img], contour_in_picture, cv2.TM_SQDIFF_NORMED)
             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
-            if min_val < 1:
+            if min_val < 0.7:
                 top_left = min_loc
                 bottom_right = (top_left[0] + w, top_left[1] + h)
                 cv2.rectangle(img_source_copy, top_left, bottom_right, 255, 2)
