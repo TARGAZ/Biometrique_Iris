@@ -1,7 +1,7 @@
 import cv2
 import os
 import numpy as np
-from matplotlib import pyplot as plt
+import matplotlib.pyplot as plt
 
 
 def count_images_in_folder(folder_path):
@@ -49,8 +49,7 @@ class iris_detection():
 
     def find_pattern(self, img_source, img_template):
         contour1, _ = cv2.findContours(self.StartPicture[img_source].copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        contour2, _ = cv2.findContours(self.StartPicture[img_template].copy(), cv2.RETR_EXTERNAL,
-                                       cv2.CHAIN_APPROX_SIMPLE)
+        contour2, _ = cv2.findContours(self.StartPicture[img_template].copy(), cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
         matches = []
         for ctn1 in contour1:
             for ctn2 in contour2:
@@ -73,6 +72,48 @@ class iris_detection():
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
+    def new_version_find_pattern(self, img_source, img_template):
+        countours, hiearchy = cv2.findContours(self.StartPicture[img_template].copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        petit_contour = []
+        for ctn in countours:
+            x, y, w, h = cv2.boundingRect(ctn)
+            if w < 738 and h < 387:
+                contour_in_picture = self.StartPicture[img_template][y:y + h, x:x + w]
+                petit_contour.append(contour_in_picture)
+
+        for i in range(len(petit_contour)):
+            res = cv2.matchTemplate(self.StartPicture[img_source], petit_contour[i], cv2.TM_SQDIFF)
+            """
+            plt.imshow(res, cmap='gray')
+            plt.show()
+            plt.imshow(self.StartPicture[img_source], cmap='gray')
+            plt.show()
+            plt.imshow(petit_contour[i], cmap='gray')
+            plt.show()
+            """
+            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+            top_left = min_loc
+            x, y, w, h = cv2.boundingRect(petit_contour[i])
+            bottom_right = (top_left[0] + w + 2, top_left[1] + h + 2)
+            cv2.rectangle(self.StartPicture[img_source], top_left, bottom_right, 255, 2)
+            """
+            plt.imshow(self.StartPicture[img_source], cmap='gray')
+            plt.show()
+            """
+
+        cv2.imshow("Image 1", self.StartPicture[img_source])
+        cv2.imshow("Image 2", self.StartPicture[img_template])
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
+        plt.imshow(res, cmap='gray')
+        plt.show()
+        plt.imshow(self.StartPicture[img_source], cmap='gray')
+        plt.show()
+        plt.imshow(self.StartPicture[img_template], cmap='gray')
+        plt.show()
+        pass
+
 
 image_count = count_images_in_folder("Intput_database")
 iris_dec = iris_detection("Intput_database", image_count)
@@ -81,4 +122,5 @@ iris_dec.better_picture()
 iris_dec.iris_detection()
 user_img_source = int(input("Enter the number of the source picture: "))
 user_img_template = int(input("Enter the number of the template picture: "))
-iris_dec.find_pattern(user_img_source, user_img_template)
+#iris_dec.find_pattern(user_img_source, user_img_template)
+iris_dec.new_version_find_pattern(user_img_source, user_img_template)
