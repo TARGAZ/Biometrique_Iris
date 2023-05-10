@@ -44,26 +44,65 @@ class IrisDetection:
         img_source_copy = self.iris_pictures[source_img].copy()
 
         # Find the contours of the template
-        contours, hierarchy = cv2.findContours(self.iris_pictures[template_img], cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        contours, hierarchy = cv2.findContours(self.iris_pictures[template_img], cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
         # Filter the contours to only get the ones that are smaller than the source picture
         filtered_contours = [
             contour for contour in contours
-            if 40 > cv2.boundingRect(contour)[2] > 0 and
-               40 > cv2.boundingRect(contour)[3] > 0
+            if 40 > cv2.boundingRect(contour)[2] > 6 and
+               40 > cv2.boundingRect(contour)[3] > 6
         ]
 
         for contour in filtered_contours:
             x, y, w, h = cv2.boundingRect(contour)
             contour_in_picture = self.iris_pictures[template_img][y - 2:y + h + 2, x - 2:x + w + 2]
-            plt.imshow(contour_in_picture, cmap='gray')
-            plt.show()
             res = cv2.matchTemplate(self.iris_pictures[source_img], contour_in_picture, cv2.TM_SQDIFF_NORMED)
             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
             if min_val < 0.7:
                 top_left = min_loc
                 bottom_right = (top_left[0] + w, top_left[1] + h)
                 cv2.rectangle(img_source_copy, top_left, bottom_right, 255, 2)
+
+        cv2.imshow("Img_source", img_source_copy)
+        cv2.imshow("Img_template", self.iris_pictures[template_img])
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
+    def find_pattern_2(self, source_img, template_img):
+        img_source_copy = self.iris_pictures[source_img].copy()
+
+        # Find the contours of the template
+        contours_template, hierarchy = cv2.findContours(self.iris_pictures[template_img], cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        contours_source, hierarchy1 = cv2.findContours(self.iris_pictures[source_img], cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+
+        # Filter the contours to only get the ones that are smaller than the source picture
+        filtered_contours_template = [
+            contour for contour in contours_template
+            if 40 > cv2.boundingRect(contour)[2] > 6 and
+               40 > cv2.boundingRect(contour)[3] > 6
+        ]
+
+        filtered_contours_source = [
+            contour for contour in contours_source
+            if 40 > cv2.boundingRect(contour)[2] > 6 and
+               40 > cv2.boundingRect(contour)[3] > 6
+        ]
+
+        for contour_template in filtered_contours_template:
+            x, y, w, h = cv2.boundingRect(contour_template)
+            contour_in_picture_template = self.iris_pictures[template_img][y - 2:y + h + 2, x - 2:x + w + 2]
+
+            for contour_source in filtered_contours_source:
+                x, y, w, h = cv2.boundingRect(contour_source)
+                contour_in_picture_source = self.iris_pictures[source_img][y - 2:y + h + 2, x - 2:x + w + 2]
+
+                if (contour_in_picture_source.shape[0] <= contour_in_picture_template.shape[0] and contour_in_picture_source.shape[1] <= contour_in_picture_template.shape[1]):
+                    res = cv2.matchTemplate(contour_in_picture_source, contour_in_picture_template,cv2.TM_SQDIFF_NORMED)
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+                    if min_val < 0.7:
+                        top_left = (min_loc[0] + x, min_loc[1] + y)
+                        bottom_right = (top_left[0] + w, top_left[1] + h)
+                        cv2.rectangle(img_source_copy, top_left, bottom_right, 255, 2)
 
         cv2.imshow("Img_source", img_source_copy)
         cv2.imshow("Img_template", self.iris_pictures[template_img])
@@ -83,3 +122,4 @@ while True:
     user_img_source = int(input("Enter the number of the source picture: "))
     user_img_template = int(input("Enter the number of the template picture: "))
     iris_detection.find_pattern(user_img_source, user_img_template)
+    iris_detection.find_pattern_2(user_img_source, user_img_template)
