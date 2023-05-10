@@ -35,9 +35,25 @@ class IrisDetection:
     def enhance_pictures(self):
         for i in range(len(self.iris_pictures)):
             self.iris_pictures[i] = cv2.cvtColor(self.iris_pictures[i], cv2.COLOR_BGR2GRAY)
+            if i == 0:
+                cv2.imshow("Img", self.iris_pictures[i])
+                cv2.waitKey(0)
+                cv2.destroyAllWindows()
             self.iris_pictures[i] = cv2.equalizeHist(self.iris_pictures[i])
+            if i == 0:
+                cv2.imshow("Img", self.iris_pictures[i])
+                cv2.waitKey(0)
+                cv2.destroyAllWindows()
             self.iris_pictures[i] = cv2.GaussianBlur(self.iris_pictures[i], (5, 5), 0)
+            if i == 0:
+                cv2.imshow("Img", self.iris_pictures[i])
+                cv2.waitKey(0)
+                cv2.destroyAllWindows()
             self.iris_pictures[i] = cv2.Canny(self.iris_pictures[i], 100, 200)
+            if i == 0:
+                cv2.imshow("Img", self.iris_pictures[i])
+                cv2.waitKey(0)
+                cv2.destroyAllWindows()
 
     def find_pattern(self, source_img, template_img):
         img_source_copy = self.iris_pictures[source_img].copy()
